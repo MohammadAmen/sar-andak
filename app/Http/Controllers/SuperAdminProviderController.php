@@ -3,21 +3,48 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProviderProfile;
+use App\Models\SuperAdmin;
 use App\Models\User;
+use App\Support\ProviderProfileShowState;
+use App\Support\ProviderStaffScope;
 use App\Support\WorkshopCategories;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rule;
 
 class SuperAdminProviderController extends Controller
 {
     public function index(Request $request)
     {
-        $type = (string) $request->query('type', 'delivery');
-        $allowed = ['delivery', 'taxi', 'water_tanker', 'workshop'];
+        $admin = SuperAdmin::query()->find(Session::get('super_admin_id'));
+        $scope = ProviderStaffScope::allowedTypesFor($admin);
+        if (is_array($scope) && $scope === []) {
+            return redirect()->route('super-admin.dashboard')->with('toast', [
+                'type' => 'warning',
+                'message' => 'لا يوجد قطاع مزوّدين مفعّل لحسابك. راجع الإدارة.',
+            ]);
+        }
+
+        $defaultType = ProviderStaffScope::defaultTypeFor($admin);
+        $rawType = $request->query('type');
+        $type = ($rawType !== null && $rawType !== '') ? (string) $rawType : $defaultType;
+
+        $allowed = ProviderStaffScope::allTypes();
         if (! in_array($type, $allowed, true)) {
-            $type = 'delivery';
+            $type = $defaultType;
+        }
+
+        if ($scope !== null && ! in_array($type, $scope, true)) {
+            return redirect()->route('super-admin.providers.index', [
+                'type' => $scope[0],
+                'q' => $request->query('q'),
+                'verified' => $request->query('verified'),
+            ])->with('toast', [
+                'type' => 'warning',
+                'message' => 'تم عرض قطاعك المصرّح به فقط.',
+            ]);
         }
 
         $q = trim((string) $request->query('q', ''));
@@ -143,10 +170,13 @@ class SuperAdminProviderController extends Controller
             default => 'مزود خدمة',
         };
 
-        return view('super-admin.providers.show', [
-            'typeLabel' => $typeLabel,
-            'profile' => $providerProfile,
-        ]);
+        return view('super-admin.providers.show', array_merge(
+            ProviderProfileShowState::forProfile($providerProfile),
+            [
+                'typeLabel' => $typeLabel,
+                'profile' => $providerProfile,
+            ]
+        ));
     }
 
     public function update(Request $request, ProviderProfile $providerProfile)

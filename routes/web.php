@@ -1,9 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SuperAdminAuthController;
-use App\Http\Controllers\SuperAdminUserController;
 use App\Http\Controllers\SuperAdminProviderController;
+use App\Http\Controllers\SuperAdminUserController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect()->route('super-admin.login');
@@ -18,6 +18,9 @@ Route::prefix('super-admin')->group(function () {
         Route::get('/dashboard', [SuperAdminAuthController::class, 'dashboard'])->name('super-admin.dashboard');
         Route::get('/users', [SuperAdminUserController::class, 'index'])->name('super-admin.users.index');
         Route::get('/providers', [SuperAdminProviderController::class, 'index'])->name('super-admin.providers.index');
+    });
+
+    Route::middleware(['super-admin.auth', 'super-admin.provider-scope'])->group(function () {
         Route::post('/providers', [SuperAdminProviderController::class, 'store'])->name('super-admin.providers.store');
         Route::get('/providers/{providerProfile}', [SuperAdminProviderController::class, 'show'])->name('super-admin.providers.show');
         Route::put('/providers/{providerProfile}', [SuperAdminProviderController::class, 'update'])->name('super-admin.providers.update');

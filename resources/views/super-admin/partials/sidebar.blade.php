@@ -32,29 +32,23 @@
 
 <div class="sidebar-section-label mt-4">مزوّدو الخدمة</div>
 
-<a class="side-link {{ request()->routeIs('super-admin.providers.*') && request('type')==='delivery' ? 'active' : '' }}"
-   href="{{ route('super-admin.providers.index', ['type' => 'delivery']) }}">
-    <i class="bi bi-truck" aria-hidden="true"></i>
-    <span>الدليفري</span>
-</a>
-
-<a class="side-link {{ request()->routeIs('super-admin.providers.*') && request('type')==='taxi' ? 'active' : '' }}"
-   href="{{ route('super-admin.providers.index', ['type' => 'taxi']) }}">
-    <i class="bi bi-car-front" aria-hidden="true"></i>
-    <span>تكسي</span>
-</a>
-
-<a class="side-link {{ request()->routeIs('super-admin.providers.*') && request('type')==='water_tanker' ? 'active' : '' }}"
-   href="{{ route('super-admin.providers.index', ['type' => 'water_tanker']) }}">
-    <i class="bi bi-droplet-half" aria-hidden="true"></i>
-    <span>صهاريج مياه</span>
-</a>
-
-<a class="side-link {{ request()->routeIs('super-admin.providers.*') && request('type')==='workshop' ? 'active' : '' }}"
-   href="{{ route('super-admin.providers.index', ['type' => 'workshop']) }}">
-    <i class="bi bi-tools" aria-hidden="true"></i>
-    <span>ورشات</span>
-</a>
+@php
+    use App\Support\ProviderStaffScope;
+    $navTypes = ProviderStaffScope::allowedTypesFor($superAdmin ?? null);
+    if ($navTypes === null) {
+        $navTypes = config('provider_ops.provider_types', []);
+    }
+    $routeProfile = request()->route('providerProfile');
+    $activeProviderType = request()->query('type') ?: ($routeProfile?->provider_type);
+@endphp
+@foreach($navTypes as $pt)
+    @php($meta = config('provider_ops.nav.'.$pt, ['label' => $pt, 'icon' => 'bi-grid']))
+    <a class="side-link {{ request()->routeIs('super-admin.providers.*') && (string) $activeProviderType === (string) $pt ? 'active' : '' }}"
+       href="{{ route('super-admin.providers.index', ['type' => $pt]) }}">
+        <i class="bi {{ $meta['icon'] }}" aria-hidden="true"></i>
+        <span>{{ $meta['label'] }}</span>
+    </a>
+@endforeach
 
 <div class="sidebar-footer-hint">
     القائمة الجانبية ثابتة على الشاشات الواسعة، ومنزلقة على الجوال.

@@ -41,10 +41,17 @@
                         <div class="helper small mb-2">اختصارات</div>
                         <div class="d-flex flex-wrap gap-2">
                             <a class="chip text-decoration-none" href="{{ route('super-admin.users.index') }}">المستخدمون</a>
-                            <a class="chip text-decoration-none" href="{{ route('super-admin.providers.index', ['type' => 'delivery']) }}">الدليفري</a>
-                            <a class="chip text-decoration-none" href="{{ route('super-admin.providers.index', ['type' => 'taxi']) }}">تكسي</a>
-                            <a class="chip text-decoration-none" href="{{ route('super-admin.providers.index', ['type' => 'water_tanker']) }}">صهاريج</a>
-                            <a class="chip text-decoration-none" href="{{ route('super-admin.providers.index', ['type' => 'workshop']) }}">ورشات</a>
+                            @php
+                                use App\Support\ProviderStaffScope;
+                                $dashNavTypes = ProviderStaffScope::allowedTypesFor($superAdmin ?? null);
+                                if ($dashNavTypes === null) {
+                                    $dashNavTypes = config('provider_ops.provider_types', []);
+                                }
+                            @endphp
+                            @foreach($dashNavTypes as $pt)
+                                @php($dm = config('provider_ops.nav.'.$pt, ['label' => $pt]))
+                                <a class="chip text-decoration-none" href="{{ route('super-admin.providers.index', ['type' => $pt]) }}">{{ $dm['label'] }}</a>
+                            @endforeach
                         </div>
                         <div class="muted small mt-2">هاي صفحات إدارة جاهزة كبداية. الخطوة التالية: إضافة “إجراءات” (توثيق/تعطيل/تغيير دور) لكل مزوّد.</div>
                     </div>
