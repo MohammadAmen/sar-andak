@@ -385,7 +385,7 @@
     <aside class="sidebar d-none d-lg-block">
         @include('super-admin.partials.sidebar')
     </aside>
-    <main class="container py-4 py-lg-5">
+    <main class="@yield('main_class', 'container') py-4 py-lg-5">
         @yield('content')
     </main>
 </div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureApiUserActive;
 use App\Http\Middleware\EnsureSuperAdminProviderScope;
 use App\Http\Middleware\SuperAdminAuth;
 use Illuminate\Foundation\Application;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'super-admin.auth' => SuperAdminAuth::class,
             'super-admin.provider-scope' => EnsureSuperAdminProviderScope::class,
+            'api.user-active' => EnsureApiUserActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

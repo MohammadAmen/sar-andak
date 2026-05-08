@@ -30,6 +30,11 @@
     <span>إدارة المستخدمين</span>
 </a>
 
+<a class="side-link {{ $active('super-admin.home-services.index') }}" href="{{ route('super-admin.home-services.index') }}">
+    <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+    <span>بطاقات الصفحة الرئيسية</span>
+</a>
+
 <div class="sidebar-section-label mt-4">مزوّدو الخدمة</div>
 
 @php

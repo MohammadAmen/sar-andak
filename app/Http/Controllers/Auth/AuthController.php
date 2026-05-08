@@ -8,7 +8,6 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -23,7 +22,7 @@ class AuthController extends Controller
             ['phone' => $request->phone],
             [
                 'code' => $code,
-                'expires_at' => Carbon::now()->addMinutes(10)
+                'expires_at' => Carbon::now()->addMinutes(10),
             ]
         );
 
@@ -31,7 +30,7 @@ class AuthController extends Controller
         // مؤقتاً سنقوم بإرجاع الكود في الـ Response للتجربة (Development Only)
         return response()->json([
             'message' => 'تم إرسال كود التحقق بنجاح',
-            'dev_code' => $code
+            'dev_code' => $code,
         ]);
     }
 
@@ -39,26 +38,32 @@ class AuthController extends Controller
     {
         $request->validate([
             'phone' => 'required|numeric',
-            'otp' => 'required|numeric'
+            'otp' => 'required|numeric',
         ]);
 
         $otpRecord = OtpCodes::where('phone', $request->phone)
-                            ->where('code', $request->otp)
-                            ->where('expires_at', '>', Carbon::now())
-                            ->first();
+            ->where('code', $request->otp)
+            ->where('expires_at', '>', Carbon::now())
+            ->first();
 
-        if (!$otpRecord) {
+        if (! $otpRecord) {
             return response()->json(['message' => 'الكود غير صحيح أو منتهي الصلاحية'], 422);
         }
 
         $user = User::firstOrCreate(
             ['phone' => $request->phone],
             [
-                'name' => 'مستخدم ' . substr($request->phone, -4),
-                'password' => Hash::make($request->phone . 'secret'),
-                'role' => 'customer'
+                'name' => 'مستخدم '.substr($request->phone, -4),
+                'password' => Hash::make($request->phone.'secret'),
+                'role' => 'customer',
             ]
         );
+
+        if (! $user->is_active) {
+            return response()->json([
+                'message' => 'تم إيقاف هذا الحساب. تواصل مع الدعم إن كان ذلك خطأ.',
+            ], 403);
+        }
 
         $otpRecord->delete();
 
@@ -72,8 +77,8 @@ class AuthController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'phone' => $user->phone,
-                'role' => $user->role
-            ]
+                'role' => $user->role,
+            ],
         ]);
     }
 }

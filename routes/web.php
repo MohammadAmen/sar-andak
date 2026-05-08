@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\SuperAdminAuthController;
+use App\Http\Controllers\SuperAdminCustomerHomeServiceController;
 use App\Http\Controllers\SuperAdminProviderController;
 use App\Http\Controllers\SuperAdminUserController;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,13 @@ Route::prefix('super-admin')->group(function () {
     Route::middleware('super-admin.auth')->group(function () {
         Route::get('/dashboard', [SuperAdminAuthController::class, 'dashboard'])->name('super-admin.dashboard');
         Route::get('/users', [SuperAdminUserController::class, 'index'])->name('super-admin.users.index');
+        Route::get('/users/{user}', [SuperAdminUserController::class, 'show'])->name('super-admin.users.show');
+        Route::get('/users/{user}/orders-export', [SuperAdminUserController::class, 'exportCustomerOrders'])->name('super-admin.users.orders-export');
+        Route::put('/users/{user}/notes', [SuperAdminUserController::class, 'updateNotes'])->name('super-admin.users.notes');
+        Route::post('/users/{user}/toggle-active', [SuperAdminUserController::class, 'toggleActive'])->name('super-admin.users.toggle-active');
+        Route::get('/home-services', [SuperAdminCustomerHomeServiceController::class, 'index'])->name('super-admin.home-services.index');
+        Route::put('/home-services/{homeService}', [SuperAdminCustomerHomeServiceController::class, 'update'])->name('super-admin.home-services.update');
+        Route::post('/home-services/reorder', [SuperAdminCustomerHomeServiceController::class, 'reorder'])->name('super-admin.home-services.reorder');
         Route::get('/providers', [SuperAdminProviderController::class, 'index'])->name('super-admin.providers.index');
     });
 

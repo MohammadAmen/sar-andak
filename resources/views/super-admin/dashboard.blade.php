@@ -40,6 +40,7 @@
                     <div class="mt-4">
                         <div class="helper small mb-2">اختصارات</div>
                         <div class="d-flex flex-wrap gap-2">
+                            <a class="chip text-decoration-none" href="{{ route('super-admin.home-services.index') }}">بطاقات التطبيق للعميل</a>
                             <a class="chip text-decoration-none" href="{{ route('super-admin.users.index') }}">المستخدمون</a>
                             @php
                                 use App\Support\ProviderStaffScope;
